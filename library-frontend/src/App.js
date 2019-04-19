@@ -3,7 +3,8 @@ import { useQuery, useMutation } from 'react-apollo-hooks'
 import Authors from './components/Authors'
 import Books from './components/Books'
 import NewBook from './components/NewBook'
-import {CREATE_BOOK, ALL_AUTHORS, ALL_BOOKS, CHANGE_BORN} from './Queries_Mutations'
+import {ALL_AUTHORS, ALL_BOOKS} from './Queries'
+import {CREATE_BOOK, CHANGE_BORN} from './Mutations'
 
 const App = () => {
 
