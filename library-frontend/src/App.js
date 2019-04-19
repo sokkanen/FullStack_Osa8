@@ -16,7 +16,7 @@ const App = () => {
   const books = useQuery(ALL_BOOKS)
   const addBook = useMutation(CREATE_BOOK, {
     onError: handleError,
-    refetchQueries: [{query: ALL_BOOKS}]
+    refetchQueries: [{query: ALL_BOOKS}, {query: ALL_AUTHORS}]
   })
   const changeBorn = useMutation(CHANGE_BORN, {
     onError: handleError,
