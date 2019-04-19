@@ -1,3 +1,17 @@
 /treeni
 /libraryBack/node_modules
 /libraryBack/package-lock.json
+/library-frontend/.idea/
+/library-frontend/.vscode/
+/library-frontend/node_modules/
+/library-frontend/build
+/library-frontend/.DS_Store
+/library-frontend/*.tgz
+/library-frontend/my-app*
+/library-frontend/template/src/__tests__/__snapshots__/
+/library-frontend/lerna-debug.log
+/library-frontend/npm-debug.log*
+/library-frontend/yarn-debug.log*
+/library-frontend/yarn-error.log*
+/library-frontend/.changelog
+/library-frontend/.npm/
