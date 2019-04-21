@@ -1,6 +1,7 @@
 /treeni
 /libraryBack/node_modules
 /libraryBack/package-lock.json
+/libraryBack/.env
 /library-frontend/.idea/
 /library-frontend/.vscode/
 /library-frontend/node_modules/
