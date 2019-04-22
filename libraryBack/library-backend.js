@@ -1,11 +1,15 @@
 require('dotenv').config()
-const { ApolloServer, gql, UserInputError } = require('apollo-server')
-const uuid = require('uuid/v1')
+const { ApolloServer, gql, UserInputError, AuthenticationError } = require('apollo-server')
+//const uuid = require('uuid/v1')
 const Author = require('./models/Author')
 const Book = require('./models/Book')
+const User = require('./models/User')
 const mongoose = require('mongoose')
+const jwt = require('jsonwebtoken')
 
 const url = process.env.DB_URI
+const SECRET = process.env.SECRET
+
 mongoose.set('useFindAndModify', false)
 mongoose.connect(url, { useNewUrlParser: true})
 .then(() => {
@@ -21,6 +25,7 @@ const typeDefs = gql`
       authorCount: Int!
       allBooks(author: String, genre: String): [Book!]!
       allAuthors: [Author!]!
+      me: User
   }
 
   type Mutation {
@@ -35,6 +40,16 @@ const typeDefs = gql`
       name: String!
       born: Int!
     ): Author
+
+    createUser(
+      username: String!
+      favoriteGenre: String!
+    ): User
+
+    login(
+      username: String!
+      password: String!
+    ): Token
   }
 
   type Book {
@@ -51,12 +66,26 @@ const typeDefs = gql`
       bookCount: Int!
       id: ID!
   }
+
+  type User {
+    username: String!
+    favoriteGenre: String!
+    id: ID!
+  }
+
+  type Token {
+    value: String!
+  }
+
 `
 
 const resolvers = {
 
     Mutation: {
-      addBook: async (root, args) => {
+      addBook: async (root, args, context) => {
+        if (!context.currentUser){
+          throw new AuthenticationError('Not authenticated')
+        }
         const auth = await Author.findOne({ name: args.author })
         if (auth === null){
           try {
@@ -75,7 +104,10 @@ const resolvers = {
           console.log('Problem saving new book', error.message)
         }
       },
-      editAuthor: async (root, args) => {
+      editAuthor: async (root, args, context) => {
+        if (!context.currentUser){
+          throw new AuthenticationError('Not authenticated')
+        }
         try {
           const res = await Author.updateOne({ "name": args.name },{ $set: { "born": args.born }})
           if (res.nModified === 0){
@@ -85,6 +117,24 @@ const resolvers = {
         } catch (error) {
           throw new UserInputError(error.message, {invalidArgs: args})
         }
+      },
+      createUser: (root, args) => {
+        const user = new User({ username: args.username, favoriteGenre: args.favoriteGenre})
+        return user.save()
+        .catch((error) => {
+          throw new UserInputError(error.message, {
+            invalidArgs: args
+          })
+        })
+      },
+      login: async (root, args) => {
+        const user = await User.findOne({ username: args.username })
+        if ( !user || args.password !== 'salainen'){
+          throw new UserInputError('Wrong credentials')
+        }
+
+        const userForToken = {username: user.username, id: user._id}
+        return { value: jwt.sign(userForToken, SECRET)}
       }
     },
 
@@ -93,8 +143,8 @@ const resolvers = {
           if (!args.name){
               return Book.collection.countDocuments()
           }
-          const auth = await Author.findOne({ name: args.name})
-          return Book.collection.countDocuments({ author: auth._id})
+          const auth = await Author.findOne({ name: args.name })
+          return Book.collection.countDocuments({ author: auth._id })
         },
       authorCount: () => Author.collection.countDocuments(),
       allBooks: async (root, args) => {
@@ -111,6 +161,9 @@ const resolvers = {
         },
       allAuthors: (root, args) => {
         return Author.find({})
+      },
+      me: (root, args, context) => {
+        return context.currentUser
       }
     },
 
@@ -133,6 +186,14 @@ const resolvers = {
 const server = new ApolloServer({
   typeDefs,
   resolvers,
+  context: async ({ req }) => {
+    const auth = req ? req.headers.authorization : null
+    if (auth && auth.toLowerCase().startsWith('bearer ')){
+      const decodedToken = jwt.verify(auth.substring(7), SECRET)
+      const currentUser = await User.findById(decodedToken.id)
+      return { currentUser }
+    }
+  }
 })
 
 server.listen().then(({ url }) => {
