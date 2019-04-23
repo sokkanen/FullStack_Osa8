@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-const NewBook = ({show, addBook}) => {
+const NewBook = ({show, addBook, handleMessage}) => {
   const [title, setTitle] = useState('')
   const [author, setAuhtor] = useState('')
   const [published, setPublished] = useState('')
@@ -14,8 +14,9 @@ const NewBook = ({show, addBook}) => {
   const newBook = async (e) => {
     e.preventDefault()
     await addBook({ variables: {title, author, published, genres}})
-    console.log(`title ${title} by ${author} added.`)
 
+    const msg = `title ${title} by ${author} added.`
+    handleMessage(msg)
     setTitle('')
     setPublished('')
     setAuhtor('')
@@ -50,7 +51,7 @@ const NewBook = ({show, addBook}) => {
           <input
             type='number'
             value={published}
-            onChange={({ target }) => setPublished(target.value)}
+            onChange={({ target }) => setPublished(parseInt(target.value))}
           />
         </div>
         <div>
