@@ -1,6 +1,7 @@
-import React from 'react'
-import { useQuery } from 'react-apollo-hooks'
+import React, { useEffect, useState } from 'react'
+import { useApolloClient } from 'react-apollo-hooks'
 import { GENRE } from '../Queries'
+import { gql } from 'apollo-boost'
 
 const Recommendations = ({data, show }) => {
   if (!show) {
@@ -9,10 +10,40 @@ const Recommendations = ({data, show }) => {
     return <div>loading...</div>
   }
 
-  let genre = useQuery(GENRE).data.me
-  genre = genre ? genre.favoriteGenre : 'loading...'
+  const BOOKS_BY_GENRE = gql`
+    query booksByGenre($genre: String!){
+      allBooks(genre: $genre){
+        title
+        author {
+          name
+          born
+        }
+        published
+        genres
+      }        
+    }
+  `
 
-  const books = data.data.allBooks.filter(b => b.genres.includes(genre))
+  const [genre, setGenre] = useState('loading...')
+  const [books, setBooks] = useState([])
+
+  const client = useApolloClient()
+
+  useEffect(() => {
+    setGenres()
+  }, [data])
+
+  const setGenres = async () => {
+    const g = await client.query({
+      query: GENRE
+    })
+    setGenre(g.data.me.favoriteGenre)
+    const bks = await client.query({
+      query: BOOKS_BY_GENRE,
+      variables: { genre: g.data.me.favoriteGenre}
+    })
+    setBooks(bks.data.allBooks)
+  }
 
   return (
     <div>
