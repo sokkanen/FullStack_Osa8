@@ -1,4 +1,5 @@
-import React from 'react'
+import React, { useState } from 'react'
+import { getFragmentQueryDocument } from 'apollo-utilities';
 
 const Books = ({data, show}) => {
   if (!show) {
@@ -6,12 +7,29 @@ const Books = ({data, show}) => {
   } else if (data.loading){
     return <div>loading...</div>
   }
-  const books = data.data.allBooks
+
+  const [books, setBooks] = useState(data.data.allBooks)
+  const [genres, setGenres] = useState([])
+
+  books.forEach(book => {
+    book.genres.forEach(g => {
+      if (!genres.includes(g)){
+        setGenres(genres.concat(g))
+      }
+    })
+  });
+
+  const bookFilter = (g) => () => { 
+    if (g === ''){
+      setBooks(data.data.allBooks)
+    } else {
+      setBooks(data.data.allBooks.filter(b => b.genres.includes(g)))
+    }
+  }
 
   return (
     <div>
       <h2>books</h2>
-
       <table>
         <tbody>
           <tr>
@@ -32,6 +50,8 @@ const Books = ({data, show}) => {
           )}
         </tbody>
       </table>
+      {genres.map(g => <button key={g} onClick={bookFilter(g)}>{g}</button>)}
+      <button key={'all'} onClick={bookFilter('')}>All genres</button>
     </div>
   )
 }
