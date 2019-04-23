@@ -24,4 +24,12 @@ const ALL_AUTHORS = gql`
 }
 `
 
-export {ALL_BOOKS, ALL_AUTHORS}
+const GENRE = gql`
+{
+  me {
+    favoriteGenre
+  }
+}
+`
+
+export {ALL_BOOKS, ALL_AUTHORS, GENRE}

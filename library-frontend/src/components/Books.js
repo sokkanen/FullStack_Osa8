@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import { getFragmentQueryDocument } from 'apollo-utilities';
 
 const Books = ({data, show}) => {
   if (!show) {

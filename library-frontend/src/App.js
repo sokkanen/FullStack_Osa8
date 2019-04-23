@@ -5,10 +5,11 @@ import Authors from './components/Authors'
 import Books from './components/Books'
 import NewBook from './components/NewBook'
 import LoginForm from './components/Login'
+import Recommendations from './components/Recommendations'
 import {ALL_AUTHORS, ALL_BOOKS} from './Queries'
 import {CREATE_BOOK, CHANGE_BORN} from './Mutations'
 
-const App = (props) => {
+const App = () => {
 
   const client = useApolloClient()
 
@@ -46,7 +47,6 @@ const App = (props) => {
   })
 
   const login = useMutation(LOGIN)
-
 
   const handleMessage = (msg) => {
     setMessage(msg)
@@ -99,11 +99,13 @@ const App = (props) => {
         <button onClick={() => setPage('authors')}>authors</button>
         <button onClick={() => setPage('books')}>books</button>
         <button onClick={() => setPage('add')}>add book</button>
+        <button onClick={() => setPage('recommendations')}>recommendations</button>
         <button onClick={logOut}>logout</button>
       </div>
           <Authors show={page === 'authors'} data={authors} changeBorn={changeBorn}/>
           <Books show={page === 'books'} data={books}/>
           <NewBook show={page === 'add'} addBook={addBook} handleMessage={handleMessage}/>
+          <Recommendations show={page === 'recommendations'} data={books}/>
       </div>
   )
 }
