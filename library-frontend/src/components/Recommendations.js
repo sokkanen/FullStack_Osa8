@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useApolloClient } from 'react-apollo-hooks'
 import { GENRE } from '../Queries'
-import { gql } from 'apollo-boost'
+import { BOOKS_BY_GENRE } from '../Queries'
 
 const Recommendations = ({data, show }) => {
   if (!show) {
@@ -9,20 +9,6 @@ const Recommendations = ({data, show }) => {
   } else if (data.loading){
     return <div>loading...</div>
   }
-
-  const BOOKS_BY_GENRE = gql`
-    query booksByGenre($genre: String!){
-      allBooks(genre: $genre){
-        title
-        author {
-          name
-          born
-        }
-        published
-        genres
-      }        
-    }
-  `
 
   const [genre, setGenre] = useState('loading...')
   const [books, setBooks] = useState([])

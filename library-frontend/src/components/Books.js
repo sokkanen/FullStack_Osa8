@@ -1,4 +1,6 @@
 import React, { useState } from 'react'
+import { useApolloClient } from 'react-apollo-hooks'
+import { BOOKS_BY_GENRE } from '../Queries'
 
 const Books = ({data, show}) => {
   if (!show) {
@@ -10,6 +12,8 @@ const Books = ({data, show}) => {
   const [books, setBooks] = useState(data.data.allBooks)
   const [genres, setGenres] = useState([])
 
+  const client = useApolloClient()
+
   books.forEach(book => {
     book.genres.forEach(g => {
       if (!genres.includes(g)){
@@ -18,12 +22,16 @@ const Books = ({data, show}) => {
     })
   });
 
-  const bookFilter = (g) => () => { 
-    if (g === ''){
+  const genresBooks = async (genre) => {
+    if (genre === ''){
       setBooks(data.data.allBooks)
-    } else {
-      setBooks(data.data.allBooks.filter(b => b.genres.includes(g)))
+      return
     }
+    const bks = await client.query({
+      query: BOOKS_BY_GENRE,
+      variables: { genre: genre}
+    })
+    setBooks(bks.data.allBooks)
   }
 
   return (
@@ -49,8 +57,8 @@ const Books = ({data, show}) => {
           )}
         </tbody>
       </table>
-      {genres.map(g => <button key={g} onClick={bookFilter(g)}>{g}</button>)}
-      <button key={'all'} onClick={bookFilter('')}>All genres</button>
+      {genres.map(g => <button key={g} onClick={() => genresBooks(g)}>{g}</button>)}
+      <button key={'all'} onClick={() => genresBooks('')}>All genres</button>
     </div>
   )
 }
