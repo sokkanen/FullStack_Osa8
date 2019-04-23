@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useApolloClient } from 'react-apollo-hooks'
-import { BOOKS_BY_GENRE } from '../Queries'
+import { BOOKS_BY_GENRE, ALL_BOOKS } from '../Queries'
 
 const Books = ({data, show}) => {
   if (!show) {
@@ -29,7 +29,15 @@ const Books = ({data, show}) => {
     }
     const bks = await client.query({
       query: BOOKS_BY_GENRE,
-      variables: { genre: genre}
+      variables: { genre: genre},
+      update: (store, response) => {
+        const data = store.readQuery({ query: ALL_BOOKS })
+        data.allBooks.push(response.data.bks)
+        store.writeQuery({
+          query: ALL_BOOKS,
+          data: data
+        })
+      }
     })
     setBooks(bks.data.allBooks)
   }

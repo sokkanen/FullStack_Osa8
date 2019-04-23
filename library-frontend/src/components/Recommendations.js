@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useApolloClient } from 'react-apollo-hooks'
 import { GENRE } from '../Queries'
-import { BOOKS_BY_GENRE } from '../Queries'
+import { BOOKS_BY_GENRE, ALL_BOOKS } from '../Queries'
 
 const Recommendations = ({data, show }) => {
   if (!show) {
@@ -26,7 +26,8 @@ const Recommendations = ({data, show }) => {
     setGenre(g.data.me.favoriteGenre)
     const bks = await client.query({
       query: BOOKS_BY_GENRE,
-      variables: { genre: g.data.me.favoriteGenre}
+      variables: { genre: g.data.me.favoriteGenre},
+      fetchPolicy: 'no-cache'
     })
     setBooks(bks.data.allBooks)
   }
