@@ -7,6 +7,7 @@ const ALL_BOOKS = gql`
     author {
       name
       born
+      bookCount
     }
     published
     genres
@@ -39,6 +40,7 @@ query booksByGenre($genre: String!){
     author {
       name
       born
+      bookCount
     }
     published
     genres
